@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ocean Breeze Mental Wellness Check</title>
+    <style>
+        /* Reset and basic styling */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Modern, clean font */
+        }
+
+        body {
+            background-color: #f0f8ff; /* AliceBlue - light, airy background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden; /* Prevent scrollbars during transitions */
+        }
+
+
+        #app-container {
+            width: 90%;
+            max-width: 450px; /* Mobile-first, but also looks good on larger screens */
+            background-color: white;
+            border-radius: 25px;  /* Rounded corners for a softer feel */
+            box-shadow: 0 10px 30px rgba(0, 123, 255, 0.15);  /* Subtle shadow */
+            overflow: hidden; /* Clip content that overflows */
+            position: relative; /* For absolute positioning of elements */
+        }
+
+
+        .question-container {
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.6s ease-in-out, opacity 0.5s ease-in-out;
+            opacity: 1;
+            position: absolute; /* Stack questions on top of each other */
+            width: 100%;
+            top: 0;
+            left: 0;
+            height: 100%;
+
+        }
+
+        .question-container.hidden {
+            transform: translateX(-100%); /* Slide out to the left */
+            opacity: 0;
+            pointer-events: none; /* Prevent clicks on hidden questions */
+        }
+
+        .question-text {
+            font-size: 20px; /* Larger, more readable font size */
+            color: #336699; /* Ocean-inspired text color */
+            margin-bottom: 30px; /* Spacing between question and options */
+            text-align: center; /* Center-align the question */
+            font-weight: 600;
+        }
+
+
+        .options-container {
+            display: flex;
+            flex-direction: column; /* Stack options vertically */
+            gap: 15px; /* Space between options */
+            margin-bottom: 40px; /* Space before progress bar */
+        }
+
+        .option {
+            padding: 15px 20px;
+            border: 2px solid #ADD8E6;  /* LightBlue border */
+            border-radius: 15px;  /* Rounded buttons */
+            background-color: transparent;
+            color: #4682B4;     /* SteelBlue text */
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s, transform 0.2s;
+            font-size: 16px;  /* Slightly larger font for options */
+            display: flex;  /* Align emoji and text */
+            align-items: center;
+            justify-content: center; /* Center text horizontally */
+            text-align: center;
+            width: 100%;  /* Make buttons fill the width */
+
+        }
+
+        .option:hover {
+            background-color: #ADD8E6;  /* LightBlue on hover */
+            color: white;
+            transform: scale(1.05);  /* Slightly enlarge on hover */
+        }
+
+        .option:active {  /* Add an active state */
+            transform: scale(0.95); /* Slightly shrink when clicked */
+        }
+
+        .option span {
+            margin-right: 10px;   /* Space between emoji and text */
+            font-size: 1.2em; /* Slightly larger emoji */
+        }
+
+
+        .progress-bar-container {
+            width: 80%;
+            height: 12px;  /* Thicker progress bar */
+            background-color: #e0e0e0;  /* Light gray background */
+            border-radius: 6px;  /* Rounded corners */
+            overflow: hidden; /* Ensure progress bar fills correctly */
+            margin: 20px auto 0; /* Center and add some top margin*/
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: #87CEEB;  /* SkyBlue */
+            width: 0%; /* Initial width */
+            transition: width 0.5s ease-in-out;
+            border-radius: 6px;  /* Match container's border-radius */
+        }
+
+
+        .result-container {
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: opacity 0.6s ease-in-out;
+            opacity: 0; /* Start hidden */
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white; /* Ensure result covers previous content */
+
+        }
+
+        .result-container.visible {
+            opacity: 1;
+            pointer-events: auto;  /*  make sure we can click stuff in the results. */
+        }
+
+        .result-title {
+            font-size: 24px;
+            color: #336699;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .result-text {
+            font-size: 18px;
+            color: #4682B4;
+            margin-bottom: 30px;
+            line-height: 1.6; /* Improved readability */
+        }
+
+        .restart-button {
+            padding: 12px 25px;
+            background-color: #87CEEB; /* SkyBlue */
+            color: white;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            font-size: 16px;
+        }
+
+        .restart-button:hover {
+            background-color: #64b5f6; /* Slightly darker SkyBlue */
+            transform: translateY(-2px);  /* Lift button slightly */
+        }
+
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Hide all questions initially, except the first */
+        .question-container:not(:first-child) {
+            display: none;  /*  Hide using display:none;  */
+        }
+
+        .wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100px; /* Adjust as needed */
+            background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 120 20" xmlns="http://www.w3.org/2000/svg"><path d="M0,10 C30,18 90,2 120,10" fill="%23ADD8E6" /></svg>') repeat-x;
+            animation: wave 7s cubic-bezier( 0.36, 0.45, 0.63, 0.53) infinite;
+            transform: translate3d(0, 0, 0); /* Hardware acceleration */
+            opacity: 0.5;  /* Semi-transparent wave */
+
+        }
+         @keyframes wave {
+            0% { background-position: 0 0; }
+            100% { background-position: 120px 0; }
+        }
+
+        #wave2 {
+            animation-duration: 10s;
+            animation-delay: -1s; /* Start at a slightly different position */
+            opacity: 0.3;
+        }
+
+          #wave3 {
+            animation-duration: 12s;
+            animation-delay: -2s;
+             opacity: 0.2;
+          }
+
+          .bouncing-emoji {
+             animation: bounce 1.5s infinite alternate;
+              display: inline-block; /* Needed for transform to work */
+
+          }
+
+        @keyframes bounce {
+            from {
+                transform: translateY(0);
+            }
+            to {
+                transform: translateY(-15px); /* Adjust for bounce height */
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+    <div id="app-container">
+        <div class="question-container">
+            <div class="question-text">오늘 하루 기분은 어떠셨나요? <span class='bouncing-emoji'>😊</span></div>
+            <div class="options-container">
+                <button class="option" data-value="1"><span>😞</span> 매우 나쁨</button>
+                <button class="option" data-value="2"><span>🙁</span> 나쁨</button>
+                <button class="option" data-value="3"><span>😐</span> 보통</button>
+                <button class="option" data-value="4"><span>🙂</span> 좋음</button>
+                <button class="option" data-value="5"><span>😃</span> 매우 좋음</button>
+            </div>
+              <div class="progress-bar-container">
+                <div class="progress-bar"></div>
+            </div>
+        </div>
+
+        <div class="question-container hidden">
+            <div class="question-text">스트레스 수준은 어느 정도인가요? <span class='bouncing-emoji'>🤯</span></div>
+            <div class="options-container">
+                <button class="option" data-value="1"><span>🧘</span> 전혀 없음</button>
+                <button class="option" data-value="2"><span>😌</span> 낮음</button>
+                <button class="option" data-value="3"><span>😐</span> 보통</button>
+                <button class="option" data-value="4"><span>😟</span> 높음</button>
+                <button class="option" data-value="5"><span>😫</span> 매우 높음</button>
+            </div>
+             <div class="progress-bar-container">
+                <div class="progress-bar"></div>
+            </div>
+        </div>
+
+        <div class="question-container hidden">
+            <div class="question-text">오늘 수면의 질은 어땠나요? <span class='bouncing-emoji'>😴</span></div>
+             <div class="options-container">
+                <button class="option" data-value="1"><span>😪</span> 매우 나쁨</button>
+                <button class="option" data-value="2"><span>🙁</span> 나쁨</button>
+                <button class="option" data-value="3"><span>😐</span> 보통</button>
+                <button class="option" data-value="4"><span>🙂</span> 좋음</button>
+                <button class="option" data-value="5"><span>😊</span> 매우 좋음</button>
+            </div>
+             <div class="progress-bar-container">
+                <div class="progress-bar"></div>
+            </div>
+        </div>
+
+        <div class="question-container hidden">
+            <div class="question-text">오늘 얼마나 에너지가 넘쳤나요? <span class='bouncing-emoji'>⚡</span></div>
+            <div class="options-container">
+                <button class="option" data-value="1"><span>😩</span> 매우 낮음</button>
+                <button class="option" data-value="2"><span>😔</span> 낮음</button>
+                <button class="option" data-value="3"><span>😐</span> 보통</button>
+                <button class="option" data-value="4"><span>😊</span> 높음</button>
+                <button class="option" data-value="5"><span>🤩</span> 매우 높음</button>
+            </div>
+             <div class="progress-bar-container">
+                <div class="progress-bar"></div>
+            </div>
+        </div>
+
+
+       <div class="question-container hidden">
+            <div class="question-text">오늘 다른 사람들과 얼마나 교류했나요? <span class='bouncing-emoji'>🤝</span></div>
+            <div class="options-container">
+                <button class="option" data-value="1"><span>👤</span> 거의 없음</button>
+                <button class="option" data-value="2"><span>🙁</span> 적음</button>
+                <button class="option" data-value="3"><span>😐</span> 보통</button>
+                <button class="option" data-value="4"><span>🙂</span> 많음</button>
+                <button class="option" data-value="5"><span>😄</span> 매우 많음</button>
+            </div>
+             <div class="progress-bar-container">
+                <div class="progress-bar"></div>
+            </div>
+        </div>
+
+        <div class="result-container">
+            <h2 class="result-title">오늘의 정신 건강 결과</h2>
+            <p class="result-text"></p>
+            <button class="restart-button">다시 하기</button>
+        </div>
+
+        <div class="wave" id="wave1"></div>
+        <div class="wave" id="wave2"></div>
+        <div class="wave" id="wave3"></div>
+    </div>
+
+    <script>
+        const questions = document.querySelectorAll('.question-container');
+        const progressBar = document.querySelector('.progress-bar');
+        const resultContainer = document.querySelector('.result-container');
+        const resultText = document.querySelector('.result-text');
+        const restartButton = document.querySelector('.restart-button');
+        let currentQuestionIndex = 0;
+        let answers = [];
+
+        function showNextQuestion() {
+            // Hide current question with animation.
+            questions[currentQuestionIndex].classList.add('hidden');
+
+            currentQuestionIndex++;
+
+              // Update progress bar.  Important to do this *before* checking
+              // if we've reached the last question.
+              const progressPercent = (currentQuestionIndex / questions.length) * 100;
+              progressBar.style.width = `${progressPercent}%`;
+
+            if (currentQuestionIndex < questions.length) {
+                // Show next question with animation after a short delay for smoother transition
+                setTimeout(() => {
+                    questions[currentQuestionIndex].style.display = 'flex';  // Make sure it's flex, not block
+                    questions[currentQuestionIndex].classList.remove('hidden');
+                    questions[currentQuestionIndex].classList.add('slideIn');
+                }, 50); // Short delay
+
+            } else {
+                // Calculate and display result
+                displayResult();
+            }
+
+        }
+
+      function displayResult() {
+        const totalScore = answers.reduce((sum, value) => sum + value, 0);
+        const averageScore = totalScore / answers.length;
+        let resultMessage = '';
+
+        if (averageScore >= 4) {
+          resultMessage = "🎉 와우! 오늘 하루는 정말 훌륭하셨네요! 긍정적인 에너지와 좋은 컨디션이 느껴집니다. 계속해서 이 좋은 흐름을 유지하세요! 작은 일에도 감사하고, 주변 사람들과 이 기쁨을 나누는 것도 잊지 마세요.";
+        } else if (averageScore >= 3) {
+          resultMessage = "😊 오늘 하루는 대체로 괜찮으셨군요!  일상의 균형을 잘 유지하고 계신 것 같습니다.  가끔은 작은 휴식이나 즐거운 활동으로 자신을 격려해 주세요.  스트레스 관리에 조금 더 신경 쓰시면 더욱 활기찬 하루를 보내실 수 있을 거예요.";
+        } else if (averageScore >= 2) {
+          resultMessage = "😐 오늘은 조금 힘든 하루였을 수도 있겠네요.  괜찮아요, 누구나 그럴 때가 있으니까요.  작은 일에 너무 얽매이지 말고, 자신을 위한 시간을 가져보세요.  좋아하는 음악을 듣거나, 따뜻한 차 한 잔과 함께 잠시 쉬는 것도 좋은 방법입니다.  필요하다면 믿을 수 있는 사람에게 마음을 터놓고 이야기해 보세요.";
+        } else {
+          resultMessage = "😞 오늘 하루, 많이 힘드셨죠?  혼자 끙끙 앓지 마시고, 주변에 도움을 요청해 보세요.  가족, 친구, 또는 전문가와의 상담도 큰 힘이 될 수 있습니다.  가장 중요한 건, 당신은 혼자가 아니라는 것을 기억하는 거예요.  작은 한 걸음부터 시작해도 괜찮아요.  햇볕을 쬐거나, 가벼운 산책을 하는 것만으로도 기분이 나아질 수 있습니다.";
+        }
+
+            resultText.textContent = resultMessage;
+            resultContainer.classList.add('visible');
+        }
+
+        function restartTest() {
+            currentQuestionIndex = 0;
+            answers = [];
+            progressBar.style.width = '0%';
+
+            // Hide result and show the first question
+             resultContainer.classList.remove('visible');
+
+
+              // Reset all questions to hidden, then show only the first one.
+            questions.forEach(q => {
+                q.style.display = 'none';
+                q.classList.add('hidden');  // Ensure they are hidden.
+            });
+
+            questions[0].style.display = 'flex'; // Show first
+            questions[0].classList.remove('hidden'); // Ensure it's visible
+        }
+
+
+        // Event listeners for options
+        document.querySelectorAll('.option').forEach(option => {
+            option.addEventListener('click', function() {
+                answers.push(parseInt(this.dataset.value));
+                showNextQuestion();
+            });
+        });
+
+        // Event listener for restart button
+        restartButton.addEventListener('click', restartTest);
+    </script>
+</body>
+
+</html>
