@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ocean Breeze Mental Wellness Check</title>
+    <style>
+        /* (Same CSS as before, with the following additions and modifications) */
+        body {
+            background-color: #f0f8ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden; /* Prevent horizontal scrollbars */
+        }
+
+        #app-container {
+            width: 90%;
+            max-width: 450px;
+            background-color: white;
+            border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(0, 123, 255, 0.15);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .question-container {
+            padding: 30px;
+            display: none; /* Initially hide all questions */
+            flex-direction: column;
+            transition: transform 0.6s ease-in-out, opacity 0.5s ease-in-out;
+            opacity: 0;
+            position: absolute;
+            width: 100%;
+            top: 0;
+            left: 0;
+            height: 100%; /* Ensure full height */
+        }
+
+        .question-container.active {
+            display: flex; /* Use flexbox for layout */
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .question-container.slide-out {
+            transform: translateX(-100%);
+            opacity: 0;
+            pointer-events: none;
+        }
+        .question-text {
+            font-size: 1.25rem; /* Slightly larger */
+            color: #336699;
+            margin-bottom: 1.875rem;
+            text-align: center;
+            font-weight: 600;
+            line-height: 1.4; /* Improve readability */
+        }
+
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.9375rem; /* 15px / 16px */
+            margin-bottom: 2.5rem;
+        }
+
+        .option {
+            padding: 0.9375rem 1.25rem; /* 15px / 16px, 20px / 16px */
+            border: 2px solid #ADD8E6;
+            border-radius: 0.9375rem;
+            background-color: transparent;
+            color: #4682B4;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s, transform 0.2s;
+            font-size: 1rem; /* Reset to 1rem (16px) */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            width: 100%;
+        }
+
+        /* (Rest of the CSS remains largely the same, ensure consistency) */
+
+        .result-container {
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: opacity 0.6s ease-in-out;
+            opacity: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            justify-content: center; /* Center content vertically */
+        }
+
+        .result-container.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .result-title {
+            font-size: 1.5rem; /* 24px */
+            color: #336699;
+            margin-bottom: 1.25rem; /* 20px */
+            font-weight: bold;
+        }
+
+        .result-percentage {
+            font-size: 2.25rem; /* 36px */
+            color: #4682B4;
+            font-weight: bold;
+            margin-bottom: 0.625rem; /* 10px */
+        }
+
+        .result-text {
+            font-size: 1.125rem; /* 18px */
+            color: #4682B4;
+            margin-bottom: 1.875rem;
+            line-height: 1.6;
+            max-width: 80%; /* Limit width for readability */
+        }
+
+        .restart-button {
+            /* (Same styles as before) */
+        }
+
+        /* Wave animation (same as before) */
+
+        /* Bouncing emoji animation (same as before) */
+        .disclaimer {
+            font-size: 0.75rem;
+            color: #666;
+            margin-top: 1rem;
+            text-align: center;
+            max-width: 80%; /
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app-container">
+        <!-- Question 1 -->
+        <div class="question-container active">
+            <div class="question-text">지난 2주 동안, 거의 매일 기분이 가라앉거나 우울하거나 절망감을 느낀 적이 있습니까?</div>
+            <div class="options-container">
+                <button class="option" data-value="0"><span>❌</span> 전혀 없음</button>
+                <button class="option" data-value="1"><span>🙁</span> 며칠</button>
+                <button class="option" data-value="2"><span>🗓️</span> 일주일 이상</button>
+                <button class="option" data-value="3"><span>📅</span> 거의 매일</button>
+            </div>
+             <div class="progress-bar-container">
+                <div class="progress-bar"></div>
+            </div>
+        </div>
+
+        <!-- Question 2 -->
+        <div class="question-container">
+            <div class="question-text">지난 2주 동안, 거의 매일 평소에 즐기던 일에 대한 흥미나 즐거움이 없었습니까?</div>
+            <div class="options-container">
+                 <button class="option" data-value="0"><span>❌</span> 전혀 없음</button>
+                <button class="option" data-value="1"><span>🙁</span> 며칠</button>
+                <button class="option" data-value="2"><span>🗓️</span> 일주일 이상</button>
+                <button class="option" data-value="3"><span>📅</span> 거의 매일</button>
+            </div>
+             <div class="progress-bar-container">
+                <div class="progress-bar"></div>
+            </div>
+        </div>
+
+        <!-- Question 3 -->
+        <div class="question-container">
+            <div class="question-text">지난 2주 동안, 식욕이 없거나 과식하는 등 식습관의 변화가 있었습니까?</div>
+            <div class="options-container">
+                 <button class="option" data-value="0"><span>❌</span> 전혀 없음</button>
+                <button class="option" data-value="1"><span>🙁</span> 며칠</button>
+                <button class="option" data-value="2"><span>🗓️</span> 일주일 이상</button>
+                <button class="option" data-value="3"><span>📅</span> 거의 매일</button>
+            </div>
+             <div class="progress-bar-container">
+                <div class="progress-bar"></div>
+            </div>
+        </div>
+
+        <!-- Question 4 -->
+		<div class="question-container">
+            <div class="question-text">지난 2주 동안, 잠을 잘 못 자거나 너무 많이 자는 등 수면 패턴의 변화가 있었습니까?</div>
+             <div class="options-container">
+               <button class="option" data-value="0"><span>❌</span> 전혀 없음</button>
+                <button class="option" data-value="1"><span>🙁</span> 며칠</button>
+                <button class="option" data-value="2"><span>🗓️</span> 일주일 이상</button>
+                <button class="option" data-value="3"><span>📅</span> 거의 매일</button>
+            </div>
+             <div class="progress-bar-container">
+                <div class="progress-bar"></div>
+            </div>
+        </div>
+
+        <!-- Question 5 -->
+		<div class="question-container">
+            <div class="question-text">지난 2주 동안, 다른 사람들이 알아챌 정도로 초조하거나 안절부절못하거나 느려진 적이 있습니까?</div>
+            <div class="options-container">
+                 <button class="option" data-value="0"><span>❌</span> 전혀 없음</button>
+                <button class="option" data-value="1"><span>🙁</span> 며칠</button>
+                <button class="option" data-value="2"><span>🗓️</span> 일주일 이상</button>
+                <button class="option" data-value="3"><span>📅</span> 거의 매일</button>
+            </div>
+             <div class="progress-bar-container">
+                <div class="progress-bar"></div>
+            </div>
+        </div>
+
+        <!-- Question 6 -->
+		<div class="question-container">
+            <div class="question-text">지난 2주 동안, 피곤하거나 기운이 없다고 느낀 적이 있습니까?</div>
+            <div class="options-container">
+                <button class="option" data-value="0"><span>❌</span> 전혀 없음</button>
+                <button class="option" data-value="1"><span>🙁</span> 며칠</button>
+                <button class="option" data-value="2"><span>🗓️</span> 일주일 이상</button>
+                <button class="option" data-value="3"><span>📅</span> 거의 매일</button>
+            </div>
+             <div class="progress-bar-container">
+                <div class="progress-bar"></div>
+            </div>
+        </div>
+
+        <!-- Question 7 -->
+		<div class="question-container">
+            <div class="question-text">지난 2주 동안, 자신이 쓸모없거나 지나치게 죄책감을 느낀 적이 있습니까?</div>
+            <div class="options-container">
+                <button class="option" data-value="0"><span>❌</span> 전혀 없음</button>
+                <button class="option" data-value="1"><span>🙁</span> 며칠</button>
+                <button class="option" data-value="2"><span>🗓️</span> 일주일 이상</button>
+                <button class="option" data-value="3"><span>📅</span> 거의 매일</button>
+            </div>
+             <div class="progress-bar-container">
+                <div class="progress-bar"></div>
+            </div>
+        </div>
+
+		<!-- Question 8 -->
+		<div class="question-container">
+            <div class="question-text">지난 2주 동안, 집중하기 어렵거나 결정을 내리기 어려웠던 적이 있습니까?</div>
+             <div class="options-container">
+               <button class="option" data-value="0"><span>❌</span> 전혀 없음</button>
+                <button class="option" data-value="1"><span>🙁</span> 며칠</button>
+                <button class="option" data-value="2"><span>🗓️</span> 일주일 이상</button>
+                <button class="option" data-value="3"><span>📅</span> 거의 매일</button>
+            </div>
+             <div class="progress-bar-container">
+                <div class="progress-bar"></div>
+            </div>
+        </div>
+
+		<!-- Question 9 -->
+		<div class="question-container">
+            <div class="question-text">지난 2주 동안, 죽음이나 자살에 대한 생각을 한 적이 있습니까?</div>
+            <div class="options-container">
+                <button class="option" data-value="0"><span>❌</span> 전혀 없음</button>
+                <button class="option" data-value="1"><span>🙁</span> 며칠</button>
+                <button class="option" data-value="2"><span>🗓️</span> 일주일 이상</button>
+                <button class="option" data-value="3"><span>📅</span> 거의 매일</button>
+            </div>
+             <div class="progress-bar-container">
+                <div class="progress-bar"></div>
+            </div>
+        </div>
+        <!-- Result Container -->
+        <div class="result-container">
+            <h2 class="result-title">Your Results</h2>
+            <div class="result-percentage"></div>
+            <p class="result-text"></p>
+             <p class="disclaimer">
+                Disclaimer: This is a self-assessment tool and not a substitute for professional medical advice. If you
+                have concerns about your mental health, please consult a qualified healthcare provider.
+            </p>
+            <button class="restart-button">Restart</button>
+        </div>
+
+        <div class="wave" id="wave1"></div>
+        <div class="wave" id="wave2"></div>
+        <div class="wave" id="wave3"></div>
+
+    </div>
+
+    <script>
+       const questions = document.querySelectorAll('.question-container');
+        const progressBar = document.querySelector('.progress-bar');
+        const resultContainer = document.querySelector('.result-container');
+        const resultPercentage = document.querySelector('.result-percentage');
+        const resultText = document.querySelector('.result-text');
+        const restartButton = document.querySelector('.restart-button');
+        let currentQuestionIndex = 0;
+        let answers = [];
+
+        function showNextQuestion() {
+            if (currentQuestionIndex < questions.length - 1) {
+                questions[currentQuestionIndex].classList.add('slide-out');
+                questions[currentQuestionIndex].classList.remove('active');
+
+                currentQuestionIndex++;
+
+                setTimeout(() => {
+                     questions[currentQuestionIndex].classList.add('active');
+                    questions[currentQuestionIndex - 1].classList.remove('slide-out'); // Clean up
+
+                }, 500); // Match transition duration
+
+                 const progressPercent = ((currentQuestionIndex) / (questions.length-1)) * 100; // Correct calculation
+                progressBar.style.width = `${progressPercent}%`;
+
+
+            } else {
+                 questions[currentQuestionIndex].classList.remove('active');
+                 const progressPercent = ((currentQuestionIndex+1) / (questions.length)) * 100;
+                progressBar.style.width = `${progressPercent}%`;
+                displayResult();
+            }
+        }
+
+        function displayResult() {
+            const totalScore = answers.reduce((sum, value) => sum + value, 0);
+            const maxScore = (questions.length -1 ) * 3; // Each question has a max score of 3
+            const depressionPercentage = (totalScore / maxScore) * 100;
+
+            resultPercentage.textContent = `${depressionPercentage.toFixed(1)}%`; // Show with one decimal place
+
+              let resultMessage = '';
+
+            if (depressionPercentage <= 20) {
+                resultMessage = "🎉 Your score suggests minimal signs of depression. Keep up the great work in maintaining your mental well-being!";
+            } else if (depressionPercentage <= 50) {
+                resultMessage = "😊 Your score indicates mild symptoms of depression.  It's a good idea to incorporate some self-care practices and consider talking to a friend or family member.";
+            } else if (depressionPercentage <= 75) {
+                resultMessage = "😐 Your score suggests moderate symptoms of depression.  We strongly recommend seeking support from a mental health professional.  They can provide guidance and help you develop coping strategies.";
+            } else {
+                resultMessage = "😞 Your score indicates significant symptoms of depression.  Please seek professional help immediately.  Remember, you're not alone, and there are effective treatments available.";
+            }
+              resultText.textContent = resultMessage;
+
+            resultContainer.classList.add('visible');
+        }
+
+
+
+        function restartTest() {
+            currentQuestionIndex = 0;
+            answers = [];
+            progressBar.style.width = '0%';
+
+            // Hide result and show the first question
+            resultContainer.classList.remove('visible');
+            questions.forEach(q => q.classList.remove('active', 'slide-out'));
+            questions[0].classList.add('active');
+        }
+
+        // Event listeners for options
+         document.querySelectorAll('.option').forEach(option => {
+            option.addEventListener('click', function() {
+                answers.push(parseInt(this.dataset.value));
+                showNextQuestion();
+            });
+        });
+
+        // Event listener for restart button
+        restartButton.addEventListener('click', restartTest);
+
+        // Initially show the first question
+        questions[0].classList.add('active');
+
+    </script>
+</body>
+
+</html>
