@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Ocean Breeze 정신 건강 자가 진단 도구">
+    <title>Ocean Breeze 정신 건강 체크</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Ocean Breeze">
+    <link rel="apple-touch-icon" href="icon-180x180.png">
+    <link rel="icon" type="image/png" href="favicon.png">
+    <style>
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f4f9fc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            color: #2c3e50;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        #app-container {
+            width: 100%;
+            max-width: 100%;
+            height: 100vh;
+            background-color: white;
+            border-radius: 0;
+            box-shadow: none;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        #app-container::-webkit-scrollbar {
+                width: 0 !important;
+                display: none;
+        }
+
+        .question-container, .intro-container, .result-container {
+            padding: 25px 20px;
+            display: none;
+            flex-direction: column;
+            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55), opacity 0.4s ease-in-out;
+            opacity: 0;
+            position: absolute;
+            width: 100%;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background-color: white;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .question-container.active, .intro-container.active, .result-container.visible {
+            display: flex;
+            opacity: 1;
+            transform: translateX(0);
+              z-index: 2;
+        }
+
+        .question-container.slide-out {
+            transform: translateX(-100%);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .question-container.slide-in {
+            animation: slideIn 0.5s forwards;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .question-text {
+            font-size: 1.2rem;
+            color: #2980b9;
+            margin-bottom: 1.8rem;
+            text-align: center;
+            font-weight: 600;
+            line-height: 1.45;
+            padding: 0 5px;
+        }
+
+        .options-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .option {
+            padding: 16px;
+            border: 1px solid #3498db;
+            border-radius: 18px;
+            background-color: transparent;
+            color: #3498db;
+            cursor: pointer;
+            transition: background-color 0.25s, color 0.25s, transform 0.15s, box-shadow 0.25s;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-weight: 500;
+            box-shadow: 0 3px 6px rgba(52, 152, 219, 0.12);
+            appearance: none;
+            -webkit-appearance: none;
+
+        }
+
+        .option:hover, .option:focus {
+            background-color: #3498db;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(52, 152, 219, 0.25);
+            outline: none;
+        }
+
+        .option:active {
+            transform: scale(0.97);
+            box-shadow: 0 2px 4px rgba(52, 152, 219, 0.1);
+        }
+
+        .option span {
+            margin-right: 7px;
+            font-size: 1.2em;
+        }
+
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: auto;
+            padding: 10px 0;
+            width: 100%;
+        }
+
+        .nav-button {
+            padding: 12px 24px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
+            font-size: 1rem;
+            font-weight: 500;
+            box-shadow: 0 3px 6px rgba(52, 152, 219, 0.12);
+            flex: 1;
+            margin: 0 5px;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+
+        .nav-button:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(52, 152, 219, 0.25);
+        }
+        .nav-button:active {
+              transform: scale(0.97);
+              box-shadow: 0 2px 4px rgba(52, 152, 219, 0.1);
+          }
+          .nav-button:disabled {
+              background-color: #bdc3c7;
+              color: #7f8c8d;
+              cursor: not-allowed;
+              box-shadow: none;
+              transform: none;
+          }
+         .nav-button.prev-button {
+                background-color: #7f8c8d;
+
+          }
+          .nav-button.prev-button:hover{
+              background-color: #95a5a6;
+          }
+
+        .progress-bar-container {
+            width: 90%;
+            height: 12px;
+            background-color: #ecf0f1;
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 20px auto 10px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: #2ecc71;
+            width: 0%;
+            transition: width 0.4s ease-in-out;
+            border-radius: 6px;
+        }
+
+        .result-container {
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: opacity 0.5s ease-in-out;
+            opacity: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            justify-content: center;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+
+        }
+
+        .result-container.visible {
+            opacity: 1;
+            pointer-events: auto;
+            z-index: 3;
+        }
+
+        .result-title {
+            font-size: 1.7rem;
+            color: #2980b9;
+            margin-bottom: 1.2rem;
+            font-weight: 700;
+        }
+
+        .result-percentage {
+            font-size: 2.8rem;
+            color: #2ecc71;
+            font-weight: 700;
+            margin-bottom: 0.8rem;
+        }
+
+        .result-text {
+            font-size: 1.15rem;
+            color: #7f8c8d;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+            max-width: 95%;
+        }
+
+        .restart-button {
+            padding: 14px 28px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background-color 0.25s, transform 0.15s, box-shadow 0.25s;
+            font-size: 1.05rem;
+            font-weight: 600;
+            box-shadow: 0 3px 6px rgba(52, 152, 219, 0.12);
+             margin-bottom: 20px;
+             appearance: none;
+            -webkit-appearance: none;
+
+        }
+        .restart-button:hover, .restart-button:focus{
+            background-color: #2980b9;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 10px rgba(52, 152, 219, 0.25);
+            outline: none;
+        }
+
+        .restart-button:active {
+             transform: scale(0.97);
+            box-shadow: 0 2px 4px rgba(52, 152, 219, 0.1);
+        }
+
+        .disclaimer {
+            font-size: 0.75rem;
+            color: #95a5a6;
+            margin-top: 1rem;
+            text-align: center;
+            max-width: 95%;
+            line-height: 1.4;
+            padding-bottom: 20px;
+        }
+
+        .intro-container {
+             padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            text-align: center;
+            position: absolute;
+            width: 100%;
+            top: 0;
+            left: 0;
+            height: 100%;
+            transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55), opacity 0.4s ease-in-out;
+            background-color: white;
+            justify-content: center;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .intro-container.slide-out {
+            transform: translateX(-100%);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .intro-text {
+            font-size: 1.05rem;
+            color: #7f8c8d;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+            animation: fadeIn 1.2s ease-in-out;
+             max-width: 95%;
+            align-self: center;
+
+        }
+
+        .start-button {
+            padding: 14px 28px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background-color 0.25s, transform 0.15s, box-shadow 0.25s;
+            font-size: 1.05rem;
+            font-weight: 600;
+            box-shadow: 0 3px 6px rgba(52, 152, 219, 0.12);
+            animation: pulse 1.8s infinite;
+             margin-bottom: 20px;
+              appearance: none;
+            -webkit-appearance: none;
+        }
+          .start-button:hover, .start-button:focus {
+                background-color: #2980b9;
+                transform: translateY(-2px);
+                box-shadow: 0 5px 10px rgba(52, 152, 219, 0.25);
+                outline: none;
+            }
+          .start-button:active{
+              transform: scale(0.97);
+                box-shadow: 0 2px 4px rgba(52, 152, 219, 0.1);
+          }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.04); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .section-title{
+              font-size: 1.7rem;
+            font-weight: 700;
+            color: #3498db;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            padding: 1rem 0;
+            width: 100%;
+             position: relative;
+            z-index: 2;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div id="app-container">
+        <div class="intro-container active">
+              <h2 class="section-title">Ocean Breeze 정신 건강 체크</h2>
+            <p class="intro-text">
+                안녕하세요. 이 도구는 PHQ-9 설문을 기반으로 제작되었으며, 여러분의 정신 건강 상태를 간략하게 평가하는 데 도움을 드립니다.
+                모든 질문에 솔직하게 답변해 주세요. 이 설문은 전문적인 진단을 대체할 수 없으며, 결과에 대해 걱정이 되신다면
+                반드시 전문가와 상담하시기 바랍니다.
+            </p>
+            <button class="start-button">시작하기</button>
+        </div>
+
+        <div class="question-container">
+            <div class="question-text">지난 2주 동안, 거의 매일 기분이 가라앉거나 우울하거나 절망감을 느낀 적이 있습니까?</div>
+            <div class="options-container">
+                <button class="option" data-value="0" tabindex="0"><span>❌</span> 전혀 없음</button>
+                <button class="option" data-value="1" tabindex="0"><span>🙁</span> 며칠</button>
+                <button class="option" data-value="2" tabindex="0"><span>🗓️</span> 일주일 이상</button>
+                <button class="option" data-value="3" tabindex="0"><span>📅</span> 거의 매일</button>
+            </div>
+             <div class="progress-bar-container">
+                <div class="progress-bar"></div>
+            </div>
+              <div class="navigation-buttons">
+                <button class="nav-button prev-button" disabled>이전</button>
+                <button class="nav-button next-button">다음</button>
+            </div>
+        </div>
+
+		<div class="question-container">
+            <div class="question-text">지난 2주 동안, 거의 매일 평소에 즐기던 일에 대한 흥미나 즐거움이 없었습니까?</div>
+            <div class="options-container">
+                <button class="option" data-value="0" tabindex="0"><span>❌</span> 전혀 없음</button>
+                <button class="option" data-value="1" tabindex="0"><span>🙁</span> 며칠</button>
+                <button class="option" data-value="2" tabindex="0"><span>🗓️</span> 일주일 이상</button>
+                <button class="option" data-value="3" tabindex="0"><span>📅</span> 거의 매일</button>
+            </div>
+             <div class="progress-bar-container">
+                <div class="progress-bar"></div>
+            </div>
+              <div class="navigation-buttons">
+                <button class="nav-button prev-button">이전</button>
+                <button class="nav-button next-button">다음</button>
+            </div>
+        </div>
+
+		<div class="question-container">
+            <div class="question-text">지난 2주 동안, 식욕이 없거나 과식하는 등 식습관의 변화가 있었습니까?</div>
+           <div class="options-container">
+                <button class="option" data-value="0" tabindex="0"><span>❌</span> 전혀 없음</button>
+                <button class="option" data-value="1" tabindex="0"><span>🙁</span> 며칠</button>
+                <button class="option" data-value="2" tabindex="0"><span>🗓️</span> 일주일 이상</button>
+                <button class="option" data-value="3" tabindex="0"><span>📅</span> 거의 매일</button>
+            </div>
+             <div class="progress-bar-container">
+                <div class="progress-bar"></div>
+            </div>
+              <div class="navigation-buttons">
+                <button class="nav-button prev-button">이전</button>
+                <button class="nav-button next-button">다음</button>
+            </div>
+        </div>
+
+		<div class="question-container">
+            <div class="question-text">지난 2주 동안, 잠을 잘 못 자거나 너무 많이 자는 등 수면 패턴의 변화가 있었습니까?</div>
+            <div class="options-container">
+                <button class="option" data-value="0" tabindex="0"><span>❌</span> 전혀 없음</button>
+                <button class="option" data-value="1" tabindex="0"><span>🙁</span> 며칠</button>
+                <button class="option" data-value="2" tabindex="0"><span>🗓️</span> 일주일 이상</button>
+                <button class="option" data-value="3" tabindex="0"><span>📅</span> 거의 매일</button>
+            </div>
+             <div class="progress-bar-container">
+                <div class="progress-bar"></div>
+            </div>
+              <div class="navigation-buttons">
+                <button class="nav-button prev-button">이전</button>
+                <button class="nav-button next-button">다음</button>
+            </div>
+        </div>
+
+		<div class="question-container">
+            <div class="question-text">지난 2주 동안, 다른 사람들이 알아챌 정도로 초조하거나 안절부절못하거나 느려진 적이 있습니까?</div>
+            <div class="options-container">
+                <button class="option" data-value="0" tabindex="0"><span>❌</span> 전혀 없음</button>
+                <button class="option" data-value="1" tabindex="0"><span>🙁</span> 며칠</button>
+                <button class="option" data-value="2" tabindex="0"><span>🗓️</span> 일주일 이상</button>
+                <button class="option" data-value="3" tabindex="0"><span>📅</span> 거의 매일</button>
+            </div>
+             <div class="progress-bar-container">
+                <div class="progress-bar"></div>
+            </div>
+              <div class="navigation-buttons">
+                <button class="nav-button prev-button">이전</button>
+                <button class="nav-button next-button">다음</button>
+            </div>
+        </div>
+
+		<div class="question-container">
+            <div class="question-text">지난 2주 동안, 피곤하거나 기운이 없다고 느낀 적이 있습니까?</div>
+             <div class="options-container">
+                <button class="option" data-value="0" tabindex="0"><span>❌</span> 전혀 없음</button>
+                <button class="option" data-value="1" tabindex="0"><span>🙁</span> 며칠</button>
+                <button class="option" data-value="2" tabindex="0"><span>🗓️</span> 일주일 이상</button>
+                <button class="option" data-value="3" tabindex="0"><span>📅</span> 거의 매일</button>
+            </div>
+             <div class="progress-bar-container">
+                <div class="progress-bar"></div>
+            </div>
+              <div class="navigation-buttons">
+                <button class="nav-button prev-button">이전</button>
+                <button class="nav-button next-button">다음</button>
+            </div>
+        </div>
+
+		<div class="question-container">
+            <div class="question-text">지난 2주 동안, 자신이 쓸모없거나 지나치게 죄책감을 느낀 적이 있습니까?</div>
+           <div class="options-container">
+                <button class="option" data-value="0" tabindex="0"><span>❌</span> 전혀 없음</button>
+                <button class="option" data-value="1" tabindex="0"><span>🙁</span> 며칠</button>
+                <button class="option" data-value="2" tabindex="0"><span>🗓️</span> 일주일 이상</button>
+                <button class="option" data-value="3" tabindex="0"><span>📅</span> 거의 매일</button>
+            </div>
+             <div class="progress-bar-container">
+                <div class="progress-bar"></div>
+            </div>
+              <div class="navigation-buttons">
+                <button class="nav-button prev-button">이전</button>
+                <button class="nav-button next-button">다음</button>
+            </div>
+        </div>
+
+		<div class="question-container">
+            <div class="question-text">지난 2주 동안, 집중하기 어렵거나 결정을 내리기 어려웠던 적이 있습니까?</div>
+             <div class="options-container">
+                <button class="option" data-value="0" tabindex="0"><span>❌</span> 전혀 없음</button>
+                <button class="option" data-value="1" tabindex="0"><span>🙁</span> 며칠</button>
+                <button class="option" data-value="2" tabindex="0"><span>🗓️</span> 일주일 이상</button>
+                <button class="option" data-value="3" tabindex="0"><span>📅</span> 거의 매일</button>
+            </div>
+             <div class="progress-bar-container">
+                <div class="progress-bar"></div>
+            </div>
+              <div class="navigation-buttons">
+                <button class="nav-button prev-button">이전</button>
+                <button class="nav-button next-button">다음</button>
+            </div>
+        </div>
+
+		<div class="question-container">
+            <div class="question-text">지난 2주 동안, 죽음이나 자살에 대한 생각을 한 적이 있습니까?</div>
+            <div class="options-container">
+                <button class="option" data-value="0" tabindex="0"><span>❌</span> 전혀 없음</button>
+                <button class="option" data-value="1" tabindex="0"><span>🙁</span> 며칠</button>
+                <button class="option" data-value="2" tabindex="0"><span>🗓️</span> 일주일 이상</button>
+                <button class="option" data-value="3" tabindex="0"><span>📅</span> 거의 매일</button>
+            </div>
+             <div class="progress-bar-container">
+                <div class="progress-bar"></div>
+            </div>
+              <div class="navigation-buttons">
+                <button class="nav-button prev-button">이전</button>
+                <button class="nav-button next-button" id="last-next-button">결과 보기</button>
+            </div>
+        </div>
+
+        <div class="result-container">
+            <h2 class="result-title">결과</h2>
+            <div class="result-percentage"></div>
+            <p class="result-text"></p>
+            <p class="disclaimer">
+                이 결과는 자가 진단 도구이며, 전문적인 의학적 조언을 대체할 수 없습니다. 정신 건강에 대한 우려가 있으시면, 자격을 갖춘
+                의료 전문가와 상담하십시오.
+            </p>
+            <button class="restart-button">다시 시작</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = document.querySelectorAll('.question-container');
+        const progressBar = document.querySelector('.progress-bar');
+        const resultContainer = document.querySelector('.result-container');
+        const resultPercentage = document.querySelector('.result-percentage');
+        const resultText = document.querySelector('.result-text');
+        const restartButton = document.querySelector('.restart-button');
+        const introContainer = document.querySelector('.intro-container');
+        const startButton = document.querySelector('.start-button');
+        let currentQuestionIndex = 0;
+        let answers = [];
+
+        function showQuestion(index) {
+            if (index >= 0 && index < questions.length) {
+                if (questions[currentQuestionIndex]) {
+                  questions[currentQuestionIndex].classList.remove('active');
+                  questions[currentQuestionIndex].classList.add('slide-out');
+                }
+
+                setTimeout(() => {
+                  questions[index].classList.add('active');
+                  questions[index].classList.remove('slide-out');
+                   if(questions[currentQuestionIndex])
+                    questions[currentQuestionIndex].classList.remove('slide-out')
+                }, 500)
+
+                currentQuestionIndex = index;
+
+                const progressPercent = (currentQuestionIndex / (questions.length - 1)) * 100;
+                progressBar.style.width = `${progressPercent}%`;
+
+                const prevButton = questions[index].querySelector('.prev-button');
+                if (prevButton) {
+                    prevButton.disabled = index === 0;
+                }
+
+            }
+        }
+
+        function showNextQuestion() {
+            if (currentQuestionIndex < questions.length) {
+                const selectedOption = questions[currentQuestionIndex].querySelector('.option.selected');
+                if (!selectedOption) {
+                alert('옵션을 선택해주세요.');
+                return;
+                }
+            }
+
+            if (currentQuestionIndex < questions.length - 1) {
+              showQuestion(currentQuestionIndex + 1);
+
+            } else {
+                const progressPercent = ((currentQuestionIndex + 1) / (questions.length)) * 100;
+                progressBar.style.width = `${progressPercent}%`;
+                displayResult();
+            }
+        }
+
+        function showPreviousQuestion() {
+             if (currentQuestionIndex > 0) {
+                showQuestion(currentQuestionIndex - 1);
+            }
+        }
+
+        function displayResult() {
+            const totalScore = answers.reduce((sum, value) => sum + value, 0);
+            const maxScore = (questions.length - 1) * 3;
+            const depressionPercentage = (totalScore / maxScore) * 100;
+
+            resultPercentage.textContent = `${depressionPercentage.toFixed(1)}%`;
+
+            let resultMessage = '';
+
+            if (depressionPercentage <= 20) {
+                resultMessage = "🎉 현재 우울 증상이 거의 없는 것으로 나타났습니다. 지금처럼 정신 건강을 잘 관리해 주세요!";
+            } else if (depressionPercentage <= 50) {
+                resultMessage = "😊 가벼운 우울 증상이 있을 수 있습니다. 자기 관리에 신경 쓰고, 친구나 가족과 이야기하는 것을 고려해 보세요.";
+            } else if (depressionPercentage <= 75) {
+                resultMessage = "😐 중간 정도의 우울 증상이 있는 것으로 보입니다. 정신 건강 전문가의 도움을 받는 것을 적극적으로 권장합니다. 전문가는 적절한 지침과 대처 방법을 제공할 수 있습니다.";
+            } else {
+                resultMessage = "😞 심각한 우울 증상이 의심됩니다. 즉시 전문가의 도움을 받으세요. 당신은 혼자가 아니며, 효과적인 치료 방법이 있습니다.";
+            }
+
+            resultText.textContent = resultMessage;
+            resultContainer.classList.add('visible');
+             resultContainer.style.display = 'flex';
+            if(questions[currentQuestionIndex]){
+              questions[currentQuestionIndex].classList.remove('active');
+              questions[currentQuestionIndex].classList.add('slide-out');
+            }
+        }
+
+        function restartTest() {
+            currentQuestionIndex = 0;
+            answers = [];
+            progressBar.style.width = '0%';
+
+            resultContainer.classList.remove('visible');
+             resultContainer.style.display = 'none';
+            questions.forEach(q => q.classList.remove('active', 'slide-out'));
+            introContainer.classList.remove('slide-out');
+            introContainer.classList.add('active');
+             introContainer.style.display = 'flex';
+
+        }
+
+        document.addEventListener('click', function(event) {
+            if (event.target.closest('.option')) {
+                const option = event.target.closest('.option');
+                const optionsContainer = option.parentElement;
+
+                optionsContainer.querySelectorAll('.option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+
+                option.classList.add('selected');
+                 const selectedValue = parseInt(option.dataset.value);
+
+                answers[currentQuestionIndex] = selectedValue; // Store answer
+            }
+        });
+
+
+        document.addEventListener('click', function(event) {
+            if (event.target.classList.contains('next-button')) {
+                showNextQuestion();
+            } else if (event.target.classList.contains('prev-button')) {
+                showPreviousQuestion();
+            }
+        });
+
+        restartButton.addEventListener('click', restartTest);
+
+        startButton.addEventListener('click', function() {
+            introContainer.classList.add('slide-out');
+            setTimeout(() => {
+                questions[0].classList.add('active');
+                introContainer.style.display = 'none';
+            }, 600);
+        });
+    </script>
+</body>
+
+</html>
