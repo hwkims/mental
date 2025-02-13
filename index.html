@@ -49,7 +49,7 @@
         }
 
         .question-container, .intro-container, .result-container {
-            padding: 25px 20px;
+            padding: 20px 15px; /* Reduced padding */
             display: none;
             flex-direction: column;
             transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55), opacity 0.4s ease-in-out;
@@ -68,7 +68,7 @@
             display: flex;
             opacity: 1;
             transform: translateX(0);
-              z-index: 2;
+            z-index: 2;
         }
 
         .question-container.slide-out {
@@ -87,31 +87,31 @@
         }
 
         .question-text {
-            font-size: 1.2rem;
+            font-size: 1.1rem; /* Slightly smaller font size */
             color: #2980b9;
-            margin-bottom: 1.8rem;
+            margin-bottom: 1.2rem; /* Reduced margin */
             text-align: center;
             font-weight: 600;
-            line-height: 1.45;
+            line-height: 1.4;
             padding: 0 5px;
         }
 
         .options-container {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-bottom: 25px;
+            gap: 10px; /* Reduced gap */
+            margin-bottom: 15px;  /*Reduced margin*/
         }
 
         .option {
-            padding: 16px;
+            padding: 14px; /* Reduced padding */
             border: 1px solid #3498db;
-            border-radius: 18px;
+            border-radius: 16px; /* Reduced radius */
             background-color: transparent;
             color: #3498db;
             cursor: pointer;
             transition: background-color 0.25s, color 0.25s, transform 0.15s, box-shadow 0.25s;
-            font-size: 1rem;
+            font-size: 0.95rem; /* Slightly smaller font size */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -137,27 +137,27 @@
         }
 
         .option span {
-            margin-right: 7px;
-            font-size: 1.2em;
+            margin-right: 6px; /* Reduced margin */
+            font-size: 1.1em; /* Slightly smaller font size */
         }
 
         .navigation-buttons {
             display: flex;
             justify-content: space-between;
-            margin-top: auto;
+            margin-top: auto; /* Pushes buttons to the bottom */
             padding: 10px 0;
             width: 100%;
         }
 
         .nav-button {
-            padding: 12px 24px;
+            padding: 10px 20px; /* Reduced padding */
             background-color: #3498db;
             color: white;
             border: none;
-            border-radius: 18px;
+            border-radius: 16px; /* Reduced radius */
             cursor: pointer;
             transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
-            font-size: 1rem;
+            font-size: 0.9rem; /* Slightly smaller font size */
             font-weight: 500;
             box-shadow: 0 3px 6px rgba(52, 152, 219, 0.12);
             flex: 1;
@@ -192,11 +192,11 @@
 
         .progress-bar-container {
             width: 90%;
-            height: 12px;
+            height: 10px; /* Slightly thinner */
             background-color: #ecf0f1;
-            border-radius: 6px;
+            border-radius: 5px; /* Reduced radius */
             overflow: hidden;
-            margin: 20px auto 10px;
+            margin: 15px auto 5px; /* Reduced margin */
         }
 
         .progress-bar {
@@ -204,11 +204,11 @@
             background-color: #2ecc71;
             width: 0%;
             transition: width 0.4s ease-in-out;
-            border-radius: 6px;
+            border-radius: 5px;
         }
 
         .result-container {
-            padding: 30px 20px;
+            padding: 25px 15px; /* Reduced padding */
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -234,39 +234,39 @@
         }
 
         .result-title {
-            font-size: 1.7rem;
+            font-size: 1.6rem; /* Slightly smaller */
             color: #2980b9;
-            margin-bottom: 1.2rem;
+            margin-bottom: 1rem;
             font-weight: 700;
         }
 
         .result-percentage {
-            font-size: 2.8rem;
+            font-size: 2.6rem; /* Slightly smaller */
             color: #2ecc71;
             font-weight: 700;
-            margin-bottom: 0.8rem;
+            margin-bottom: 0.7rem; /* Reduced margin */
         }
 
         .result-text {
-            font-size: 1.15rem;
+            font-size: 1.1rem; /* Slightly smaller */
             color: #7f8c8d;
-            margin-bottom: 2rem;
+            margin-bottom: 1.8rem; /* Reduced margin */
             line-height: 1.6;
             max-width: 95%;
         }
 
         .restart-button {
-            padding: 14px 28px;
+            padding: 12px 24px; /* Reduced padding */
             background-color: #3498db;
             color: white;
             border: none;
-            border-radius: 20px;
+            border-radius: 18px; /* Reduced radius */
             cursor: pointer;
             transition: background-color 0.25s, transform 0.15s, box-shadow 0.25s;
-            font-size: 1.05rem;
+            font-size: 1rem;
             font-weight: 600;
             box-shadow: 0 3px 6px rgba(52, 152, 219, 0.12);
-             margin-bottom: 20px;
+             margin-bottom: 15px; /* Reduced margin */
              appearance: none;
             -webkit-appearance: none;
 
@@ -284,17 +284,17 @@
         }
 
         .disclaimer {
-            font-size: 0.75rem;
+            font-size: 0.7rem; /* Slightly smaller */
             color: #95a5a6;
-            margin-top: 1rem;
+            margin-top: 0.8rem; /* Reduced margin */
             text-align: center;
             max-width: 95%;
             line-height: 1.4;
-            padding-bottom: 20px;
+            padding-bottom: 15px; /* Reduced padding */
         }
 
         .intro-container {
-             padding: 30px 20px;
+             padding: 25px 15px; /* Reduced padding */
             display: flex;
             flex-direction: column;
             text-align: center;
@@ -317,9 +317,9 @@
         }
 
         .intro-text {
-            font-size: 1.05rem;
+            font-size: 1rem; /* Slightly smaller */
             color: #7f8c8d;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.2rem; /* Reduced margin */
             line-height: 1.6;
             animation: fadeIn 1.2s ease-in-out;
              max-width: 95%;
@@ -328,18 +328,18 @@
         }
 
         .start-button {
-            padding: 14px 28px;
+            padding: 12px 24px; /* Reduced padding */
             background-color: #3498db;
             color: white;
             border: none;
-            border-radius: 20px;
+            border-radius: 18px; /* Reduced radius */
             cursor: pointer;
             transition: background-color 0.25s, transform 0.15s, box-shadow 0.25s;
-            font-size: 1.05rem;
+            font-size: 1rem;
             font-weight: 600;
             box-shadow: 0 3px 6px rgba(52, 152, 219, 0.12);
             animation: pulse 1.8s infinite;
-             margin-bottom: 20px;
+             margin-bottom: 15px; /* Reduced margin */
               appearance: none;
             -webkit-appearance: none;
         }
@@ -365,11 +365,11 @@
             to { opacity: 1; transform: translateY(0); }
         }
         .section-title{
-              font-size: 1.7rem;
+              font-size: 1.6rem; /* Slightly smaller */
             font-weight: 700;
             color: #3498db;
             text-align: center;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.2rem; /* Reduced margin */
             padding: 1rem 0;
             width: 100%;
              position: relative;
@@ -580,11 +580,12 @@
                   questions[index].classList.remove('slide-out');
                    if(questions[currentQuestionIndex])
                     questions[currentQuestionIndex].classList.remove('slide-out')
-                }, 500)
+                }, 500);
 
                 currentQuestionIndex = index;
 
-                const progressPercent = (currentQuestionIndex / (questions.length - 1)) * 100;
+                // Corrected progress calculation:
+                const progressPercent = (index / (questions.length - 1)) * 100;
                 progressBar.style.width = `${progressPercent}%`;
 
                 const prevButton = questions[index].querySelector('.prev-button');
@@ -608,8 +609,7 @@
               showQuestion(currentQuestionIndex + 1);
 
             } else {
-                const progressPercent = ((currentQuestionIndex + 1) / (questions.length)) * 100;
-                progressBar.style.width = `${progressPercent}%`;
+                // No progress bar update needed here, handled in showQuestion
                 displayResult();
             }
         }
@@ -674,7 +674,7 @@
                 option.classList.add('selected');
                  const selectedValue = parseInt(option.dataset.value);
 
-                answers[currentQuestionIndex] = selectedValue; // Store answer
+                answers[currentQuestionIndex] = selectedValue;
             }
         });
 
