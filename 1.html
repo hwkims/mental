@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="ko">  <!-- Changed to Korean language -->
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Ocean Breeze 정신 건강 자가 진단 도구입니다. PHQ-9 기반으로 우울 증상을 평가합니다.">
+    <title>Ocean Breeze 정신 건강 체크</title>
+    <style>
+        /* Reset and Base Styles */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif; /* Professional Korean font */
+            background-color: #f4f9fc; /* Lighter, more professional background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            color: #2c3e50; /* Darker, more readable text color */
+        }
+
+        #app-container {
+            width: 95%; /* Slightly smaller for better mobile view */
+            max-width: 420px; /* Reduced max-width for a more focused layout */
+            background-color: white;
+            border-radius: 28px; /* Slightly more rounded corners */
+            box-shadow: 0 12px 36px rgba(0, 102, 187, 0.18); /* More refined shadow */
+            overflow: hidden;
+            position: relative;
+            padding-bottom: 20px; /* Add padding at the bottom */
+        }
+
+        /* Question Styles */
+        .question-container {
+            padding: 35px;
+            display: none;
+            flex-direction: column;
+            transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55), opacity 0.5s ease-in-out; /* Smoother animation */
+            opacity: 0;
+            position: absolute;
+            width: 100%;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background-color: white; /* Ensure questions have a white background */
+        }
+
+        .question-container.active {
+            display: flex;
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .question-container.slide-out {
+            transform: translateX(-120%); /* Exaggerate for a more noticeable slide */
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .question-text {
+            font-size: 1.3rem; /* Slightly larger */
+            color: #2980b9; /* A more professional blue */
+            margin-bottom: 2rem;
+            text-align: center;
+            font-weight: 700; /* Bolder */
+            line-height: 1.5;
+            padding: 0 10px; /* Add some horizontal padding */
+        }
+
+        .options-container {
+            display: grid; /* Use grid for more precise control */
+            grid-template-columns: repeat(2, 1fr); /* Two columns */
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .option {
+            padding: 18px;
+            border: 2px solid #3498db; /* Match question text color */
+            border-radius: 20px;
+            background-color: transparent;
+            color: #3498db;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s, transform 0.2s, box-shadow 0.3s; /* Add box-shadow transition */
+            font-size: 1.05rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-weight: 500; /* Slightly bolder text */
+            box-shadow: 0 4px 8px rgba(52, 152, 219, 0.1); /* Subtle shadow */
+        }
+
+        .option:hover {
+            background-color: #3498db;
+            color: white;
+            transform: translateY(-3px); /* More noticeable lift */
+            box-shadow: 0 6px 12px rgba(52, 152, 219, 0.2); /* Enhanced shadow on hover */
+        }
+
+        .option:active {
+            transform: translateY(-1px); /* Slight push down */
+            box-shadow: 0 4px 8px rgba(52, 152, 219, 0.1); /* Return to original shadow */
+        }
+
+        .option span {
+            margin-right: 8px;
+            font-size: 1.3em;
+        }
+
+        /* Progress Bar Styles */
+        .progress-bar-container {
+            width: 85%;
+            height: 14px;
+            background-color: #ecf0f1;
+            border-radius: 7px;
+            overflow: hidden;
+            margin: 25px auto 0;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: #2ecc71; /* A professional green */
+            width: 0%;
+            transition: width 0.5s ease-in-out;
+            border-radius: 7px;
+        }
+
+        /* Result Styles */
+        .result-container {
+            padding: 40px; /* More padding */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            transition: opacity 0.6s ease-in-out;
+            opacity: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            justify-content: center;
+        }
+
+        .result-container.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .result-title {
+            font-size: 1.8rem; /* Larger title */
+            color: #2980b9;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+        }
+
+        .result-percentage {
+            font-size: 3rem; /* Even larger percentage */
+            color: #2ecc71; /* Consistent green color */
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .result-text {
+            font-size: 1.2rem;
+            color: #7f8c8d; /* A muted, professional gray */
+            margin-bottom: 2.5rem;
+            line-height: 1.6;
+            max-width: 90%;
+        }
+
+        .restart-button {
+            padding: 15px 30px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 22px; /* Consistent rounding */
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s; /* Add box-shadow transition */
+            font-size: 1.1rem;
+            font-weight: 600;
+            box-shadow: 0 4px 8px rgba(52, 152, 219, 0.1); /* Subtle shadow */
+        }
+
+        .restart-button:hover {
+            background-color: #2980b9;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(52, 152, 219, 0.2);
+        }
+        .restart-button:active {
+            transform: scale(0.98);  /* Add scale on press. */
+            box-shadow: 0 2px 4px rgba(52, 152, 219, 0.1);
+        }
+        .disclaimer {
+            font-size: 0.8rem; /* Slightly larger */
+            color: #95a5a6; /* Lighter gray */
+            margin-top: 1.5rem;
+            text-align: center;
+            max-width: 90%;
+            line-height: 1.4;
+        }
+
+        /* Wave (Optional - can be removed if it doesn't fit the professional aesthetic) */
+        .wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100px;
+            background: url('data:image/svg+xml;utf8,<svg viewBox="0 0 120 20" xmlns="http://www.w3.org/2000/svg"><path d="M0,10 C30,18 90,2 120,10" fill="%23e8f5fe" /></svg>') repeat-x; /* Lighter wave color */
+            animation: wave 7s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
+            transform: translate3d(0, 0, 0);
+            opacity: 0.6;
+            z-index: -1; /* Put waves behind content */
+        }
+
+        @keyframes wave {
+            0% {
+                background-position: 0 0;
+            }
+
+            100% {
+                background-position: 120px 0;
+            }
+        }
+
+        #wave2 {
+            animation-duration: 10s;
+            animation-delay: -1s;
+            opacity: 0.4;
+        }
+
+        #wave3 {
+            animation-duration: 12s;
+            animation-delay: -2s;
+            opacity: 0.2;
+        }
+          .section-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #3498db;
+            text-align: center;
+            margin-bottom: 1rem;
+            padding: 1.5rem 0;
+            background-color: #f0f8ff; /* Light background for title */
+            width: 100%;
+            border-bottom: 1px solid #ddd; /* Subtle divider */
+        }
+
+        .intro-container{
+            padding: 35px;
+            display: flex;
+            flex-direction: column;
+            text-align: center;
+            opacity: 1;
+            position: relative;   /* Make sure the position is set. */
+            width: 100%;
+            top: 0;
+            left: 0;
+            height: 100%; /* Ensure full height */
+            transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55), opacity 0.5s ease-in-out;
+            background-color: white;
+        }
+        .intro-container.slide-out{
+            transform: translateX(-120%); /* Exaggerate for a more noticeable slide */
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .intro-text {
+            font-size: 1.1rem;
+            color: #7f8c8d;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+            animation: fadeIn 1.5s ease-in-out;
+        }
+
+        .start-button {
+            padding: 15px 30px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 22px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
+            font-size: 1.1rem;
+            font-weight: 600;
+            box-shadow: 0 4px 8px rgba(52, 152, 219, 0.1);
+            animation: pulse 2s infinite;
+        }
+         .start-button:hover {
+            background-color: #2980b9;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(52, 152, 219, 0.2);
+        }
+        .start-button:active {
+            transform: scale(0.98);  /* Add scale on press. */
+            box-shadow: 0 2px 4px rgba(52, 152, 219, 0.1);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+    </style>
+    <!-- Include Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div id="app-container">
+
+    <!-- Introduction Screen -->
+    <div class="intro-container">
+        <h2 class="section-title">Ocean Breeze 정신 건강 체크</h2>
+        <p class="intro-text">
+            안녕하세요. 이 도구는 PHQ-9 설문을 기반으로 제작되었으며, 여러분의 정신 건강 상태를 간략하게 평가하는 데 도움을 드립니다.
+            모든 질문에 솔직하게 답변해 주세요. 이 설문은 전문적인 진단을 대체할 수 없으며, 결과에 대해 걱정이 되신다면
+            반드시 전문가와 상담하시기 바랍니다.
+        </p>
+        <button class="start-button">시작하기</button>
+    </div>
+
+        <!-- Question 1 -->
+        <div class="question-container">
+            <div class="question-text">지난 2주 동안, 거의 매일 기분이 가라앉거나 우울하거나 절망감을 느낀 적이 있습니까?</div>
+            <div class="options-container">
+                <button class="option" data-value="0"><span>❌</span> 전혀 없음</button>
+                <button class="option" data-value="1"><span>🙁</span> 며칠</button>
+                <button class="option" data-value="2"><span>🗓️</span> 일주일 이상</button>
+                <button class="option" data-value="3"><span>📅</span> 거의 매일</button>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar"></div>
+            </div>
+        </div>
+
+        <!-- Question 2 -->
+        <div class="question-container">
+            <div class="question-text">지난 2주 동안, 거의 매일 평소에 즐기던 일에 대한 흥미나 즐거움이 없었습니까?</div>
+            <div class="options-container">
+                <button class="option" data-value="0"><span>❌</span> 전혀 없음</button>
+                <button class="option" data-value="1"><span>🙁</span> 며칠</button>
+                <button class="option" data-value="2"><span>🗓️</span> 일주일 이상</button>
+                <button class="option" data-value="3"><span>📅</span> 거의 매일</button>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar"></div>
+            </div>
+        </div>
+
+        <!-- Question 3 -->
+        <div class="question-container">
+            <div class="question-text">지난 2주 동안, 식욕이 없거나 과식하는 등 식습관의 변화가 있었습니까?</div>
+            <div class="options-container">
+                <button class="option" data-value="0"><span>❌</span> 전혀 없음</button>
+                <button class="option" data-value="1"><span>🙁</span> 며칠</button>
+                <button class="option" data-value="2"><span>🗓️</span> 일주일 이상</button>
+                <button class="option" data-value="3"><span>📅</span> 거의 매일</button>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar"></div>
+            </div>
+        </div>
+
+        <!-- Question 4 -->
+        <div class="question-container">
+            <div class="question-text">지난 2주 동안, 잠을 잘 못 자거나 너무 많이 자는 등 수면 패턴의 변화가 있었습니까?</div>
+            <div class="options-container">
+                <button class="option" data-value="0"><span>❌</span> 전혀 없음</button>
+                <button class="option" data-value="1"><span>🙁</span> 며칠</button>
+                <button class="option" data-value="2"><span>🗓️</span> 일주일 이상</button>
+                <button class="option" data-value="3"><span>📅</span> 거의 매일</button>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar"></div>
+            </div>
+        </div>
+
+        <!-- Question 5 -->
+        <div class="question-container">
+            <div class="question-text">지난 2주 동안, 다른 사람들이 알아챌 정도로 초조하거나 안절부절못하거나 느려진 적이 있습니까?</div>
+            <div class="options-container">
+                <button class="option" data-value="0"><span>❌</span> 전혀 없음</button>
+                <button class="option" data-value="1"><span>🙁</span> 며칠</button>
+                <button class="option" data-value="2"><span>🗓️</span> 일주일 이상</button>
+                <button class="option" data-value="3"><span>📅</span> 거의 매일</button>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar"></div>
+            </div>
+        </div>
+
+        <!-- Question 6 -->
+        <div class="question-container">
+            <div class="question-text">지난 2주 동안, 피곤하거나 기운이 없다고 느낀 적이 있습니까?</div>
+            <div class="options-container">
+                <button class="option" data-value="0"><span>❌</span> 전혀 없음</button>
+                <button class="option" data-value="1"><span>🙁</span> 며칠</button>
+                <button class="option" data-value="2"><span>🗓️</span> 일주일 이상</button>
+                <button class="option" data-value="3"><span>📅</span> 거의 매일</button>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar"></div>
+            </div>
+        </div>
+
+        <!-- Question 7 -->
+        <div class="question-container">
+            <div class="question-text">지난 2주 동안, 자신이 쓸모없거나 지나치게 죄책감을 느낀 적이 있습니까?</div>
+            <div class="options-container">
+                <button class="option" data-value="0"><span>❌</span> 전혀 없음</button>
+                <button class="option" data-value="1"><span>🙁</span> 며칠</button>
+                <button class="option" data-value="2"><span>🗓️</span> 일주일 이상</button>
+                <button class="option" data-value="3"><span>📅</span> 거의 매일</button>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar"></div>
+            </div>
+        </div>
+
+        <!-- Question 8 -->
+        <div class="question-container">
+            <div class="question-text">지난 2주 동안, 집중하기 어렵거나 결정을 내리기 어려웠던 적이 있습니까?</div>
+            <div class="options-container">
+                <button class="option" data-value="0"><span>❌</span> 전혀 없음</button>
+                <button class="option" data-value="1"><span>🙁</span> 며칠</button>
+                <button class="option" data-value="2"><span>🗓️</span> 일주일 이상</button>
+                <button class="option" data-value="3"><span>📅</span> 거의 매일</button>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar"></div>
+            </div>
+        </div>
+
+        <!-- Question 9 -->
+        <div class="question-container">
+            <div class="question-text">지난 2주 동안, 죽음이나 자살에 대한 생각을 한 적이 있습니까?</div>
+            <div class="options-container">
+                <button class="option" data-value="0"><span>❌</span> 전혀 없음</button>
+                <button class="option" data-value="1"><span>🙁</span> 며칠</button>
+                <button class="option" data-value="2"><span>🗓️</span> 일주일 이상</button>
+                <button class="option" data-value="3"><span>📅</span> 거의 매일</button>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-bar"></div>
+            </div>
+        </div>
+        <!-- Result Container -->
+        <div class="result-container">
+            <h2 class="result-title">결과</h2>
+            <div class="result-percentage"></div>
+            <p class="result-text"></p>
+            <p class="disclaimer">
+                이 결과는 자가 진단 도구이며, 전문적인 의학적 조언을 대체할 수 없습니다. 정신 건강에 대한 우려가 있으시면, 자격을 갖춘
+                의료 전문가와 상담하십시오.
+            </p>
+            <button class="restart-button">다시 시작</button>
+        </div>
+
+        <div class="wave" id="wave1"></div>
+        <div class="wave" id="wave2"></div>
+        <div class="wave" id="wave3"></div>
+
+    </div>
+
+    <script>
+        const questions = document.querySelectorAll('.question-container');
+        const progressBar = document.querySelector('.progress-bar');
+        const resultContainer = document.querySelector('.result-container');
+        const resultPercentage = document.querySelector('.result-percentage');
+        const resultText = document.querySelector('.result-text');
+        const restartButton = document.querySelector('.restart-button');
+        const introContainer = document.querySelector('.intro-container');
+        const startButton = document.querySelector('.start-button');
+        let currentQuestionIndex = 0;
+        let answers = [];
+
+        function showNextQuestion() {
+            if (currentQuestionIndex < questions.length - 1) {
+                questions[currentQuestionIndex].classList.add('slide-out');
+                questions[currentQuestionIndex].classList.remove('active');
+
+                currentQuestionIndex++;
+
+                setTimeout(() => {
+                    questions[currentQuestionIndex].classList.add('active');
+                    questions[currentQuestionIndex - 1].classList.remove('slide-out'); // Clean up
+                }, 600); // Match transition duration
+
+                const progressPercent = ((currentQuestionIndex) / (questions.length - 1)) * 100;
+                progressBar.style.width = `${progressPercent}%`;
+
+            } else {
+                questions[currentQuestionIndex].classList.remove('active');
+                const progressPercent = ((currentQuestionIndex + 1) / (questions.length)) * 100;
+                progressBar.style.width = `${progressPercent}%`;
+                displayResult();
+            }
+        }
+         function displayResult() {
+            const totalScore = answers.reduce((sum, value) => sum + value, 0);
+            const maxScore = (questions.length - 1) * 3; // Each question has a max score of 3
+            const depressionPercentage = (totalScore / maxScore) * 100;
+
+            resultPercentage.textContent = `${depressionPercentage.toFixed(1)}%`;
+
+            let resultMessage = '';
+
+            if (depressionPercentage <= 20) {
+                resultMessage = "🎉 현재 우울 증상이 거의 없는 것으로 나타났습니다.  지금처럼 정신 건강을 잘 관리해 주세요!";
+            } else if (depressionPercentage <= 50) {
+                resultMessage = "😊 가벼운 우울 증상이 있을 수 있습니다.  자기 관리에 신경 쓰고, 친구나 가족과 이야기하는 것을 고려해 보세요.";
+            } else if (depressionPercentage <= 75) {
+                resultMessage = "😐 중간 정도의 우울 증상이 있는 것으로 보입니다.  정신 건강 전문가의 도움을 받는 것을 적극적으로 권장합니다.  전문가는 적절한 지침과 대처 방법을 제공할 수 있습니다.";
+            } else {
+                resultMessage = "😞 심각한 우울 증상이 의심됩니다.  즉시 전문가의 도움을 받으세요.  당신은 혼자가 아니며, 효과적인 치료 방법이 있습니다.";
+            }
+
+            resultText.textContent = resultMessage;
+            resultContainer.classList.add('visible');
+        }
+
+
+        function restartTest() {
+            currentQuestionIndex = 0;
+            answers = [];
+            progressBar.style.width = '0%';
+
+            resultContainer.classList.remove('visible');
+            questions.forEach(q => q.classList.remove('active', 'slide-out'));
+            questions[0].classList.add('active'); // Show the first question
+             introContainer.classList.remove('slide-out');
+        }
+
+
+        // Event listeners for options
+        document.querySelectorAll('.option').forEach(option => {
+            option.addEventListener('click', function () {
+                answers.push(parseInt(this.dataset.value));
+                showNextQuestion();
+            });
+        });
+
+        // Event listener for restart button
+        restartButton.addEventListener('click', restartTest);
+
+        // Event listener for start button
+        startButton.addEventListener('click', function() {
+            introContainer.classList.add('slide-out');
+            setTimeout(() => {
+                questions[0].classList.add('active');
+                introContainer.style.display = 'none'; // Hide intro after animation
+            }, 600);
+        });
+
+        // No need to initially show a question, the intro screen is shown first.
+    </script>
+</body>
+
+</html>
